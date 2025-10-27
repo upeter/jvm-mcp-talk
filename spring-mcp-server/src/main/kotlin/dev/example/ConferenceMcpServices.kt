@@ -1,0 +1,183 @@
+package dev.example
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import org.springframework.ai.support.ToolCallbacks
+import org.springframework.ai.tool.annotation.Tool
+import org.springframework.ai.tool.annotation.ToolParam
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.core.io.ClassPathResource
+import org.springframework.stereotype.Repository
+import org.springframework.stereotype.Service
+import java.util.concurrent.ConcurrentHashMap
+
+// MCP counterparts for Conference tools from spring-ai module
+
+data class ConferenceSessionSearchResult(val title: String, val score: Double)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class ConferenceSession(
+    val title: String,
+    val startsAt: String,
+    val endsAt: String,
+    val category: List<String> = emptyList(),
+    val speakers: List<String> = emptyList(),
+    val room: String,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class Dataset(val sessions: List<ConferenceSession> = emptyList())
+
+@Service
+class ConferencePreferenceRepository {
+    fun getPreferredSessionsBy(conversationKey: String): Set<ConferenceSession> =
+        preferences[conversationKey]?.toSet().orEmpty()
+
+    fun addToPreferenceSessions(conversationKey: String, sessionTitle: String) {
+        requireNotNull(findBySessionTitle(sessionTitle)).let { session ->
+            updatePreferences(conversationKey) {
+                it.add(session)
+            }
+        }
+    }
+
+    fun removePreferredSession(conversationKey: String, sessionTitle: String) {
+        requireNotNull(findBySessionTitle(sessionTitle)).let { session ->
+            updatePreferences(conversationKey) {
+                it.remove(session)
+            }
+        }
+    }
+
+    private fun findBySessionTitle(sessionTitle: String): ConferenceSession? = sessions.firstOrNull {
+        it.title.lowercase().startsWith(sessionTitle.lowercase())
+    }
+
+    private fun updatePreferences(
+        conversationId: String,
+        transform: (MutableSet<ConferenceSession>) -> Unit
+    ) {
+        preferences.compute(conversationId) { _, existing ->
+            val current = existing ?: mutableSetOf()
+            transform(current)
+            current
+        }
+    }
+
+    companion object {
+        private val mapper: ObjectMapper = jacksonObjectMapper()
+        internal val sessions: List<ConferenceSession> = run {
+            val dataset: Dataset = mapper.readValue(
+                ClassPathResource("data/dataset-jfall-venue.json").inputStream
+            )
+            dataset.sessions
+        }
+        private val preferences = ConcurrentHashMap<String, MutableSet<ConferenceSession>>()
+    }
+}
+
+@Service
+class ConferenceMcpService(
+    private val conferencePreferenceRepository: ConferencePreferenceRepository,
+) {
+
+    // Simple similarity search over titles based on containment and Jaccard score of words
+    @Tool(
+        name = "conference-session-search",
+        description = "Performs a simple similarity search for conference sessions (title based) and returns matching results with a heuristic score."
+    )
+    fun searchSessions(
+        @ToolParam(description = "The search query") query: String
+    ): List<ConferenceSessionSearchResult> {
+        val q = query.trim()
+        if (q.isEmpty()) return emptyList()
+        val qTokens = q.lowercase().split(Regex("\\s+")).filter { it.isNotBlank() }.toSet()
+        val all = ConferencePreferenceRepository.sessions
+        return all.map { it.title }
+            .distinct()
+            .map { title ->
+                val titleTokens = title.lowercase().split(Regex("\\s+")).filter { it.isNotBlank() }.toSet()
+                val inter = qTokens.intersect(titleTokens).size.toDouble()
+                val union = (qTokens + titleTokens).size.toDouble()
+                val j = if (union == 0.0) 0.0 else inter / union
+                val containsBoost = if (title.contains(q, ignoreCase = true)) 0.5 else 0.0
+                ConferenceSessionSearchResult(title, (j + containsBoost).coerceAtMost(1.0))
+            }
+            .filter { it.score >= 0.3 }
+            .sortedByDescending { it.score }
+            .take(10)
+    }
+
+    @Tool(
+        name = "get-preferred-sessions",
+        description = "Get all preferred sessions of the user."
+    )
+    fun getPreferredSessionsBy(
+        @ToolParam(description = "The conversation id to scope user preferences") conversationId: String
+    ): Set<ConferenceSession> = conferencePreferenceRepository.getPreferredSessionsBy(conversationId)
+
+    @Tool(
+        name = "add-preferred-sessions",
+        description = "Add a session to preferences for the user"
+    )
+    fun addPreferenceSessions(
+        @ToolParam(description = "the session title of the session to add") sessionTitle: String,
+        @ToolParam(description = "The conversation id to scope user preferences") conversationId: String
+    ) {
+        conferencePreferenceRepository.addToPreferenceSessions(conversationId, sessionTitle)
+    }
+
+    @Tool(
+        name = "remove-preferred-sessions",
+        description = "Remove a session from preferences for the user."
+    )
+    fun removePreferredSession(
+        @ToolParam(description = "the session title of the session to remove") sessionTitle: String,
+        @ToolParam(description = "The conversation id to scope user preferences") conversationId: String
+    ) {
+        conferencePreferenceRepository.removePreferredSession(conversationId, sessionTitle)
+    }
+
+    @Tool(
+        name = "jfall-system-prompt",
+        description = "Returns the JFall assistant system prompt used by the chat server."
+    )
+    fun jfallSystemPrompt(): String = SYSTEM_PROMPT
+
+    // MCP Resource counterpart: expose the venue information as a retrievable blob
+    @Tool(
+        name = "general-venue-information-jfall",
+        description = "Returns general JFall 2025 venue information including address, dates, hotels, and the detailed session schedule in JSON form."
+    )
+    fun getVenueInformation(): String = venueInformation
+
+    companion object {
+        // Copied from AIController.SYSTEM_PROMPT to avoid cross-module dependency
+        private val SYSTEM_PROMPT = """
+            You are a helper assistant for the JFall 2025 conference. 
+            Respond in a friendly, helpful manner.
+            Objective: Assist the user in finding the best matching sessions for his preferences and provide relevant information about the conference.
+            Make use of tools to fetch relevant information about sessions, speakers, and venue details.
+        """.trimIndent()
+
+        val venueInformation: String =
+            ConferenceMcpService::class.java.getResourceAsStream("/data/dataset-jfall-venue.json").bufferedReader()
+                .use {
+                    it.readText()
+                }
+    }
+}
+
+@Configuration
+class ConferenceMcpConfig(
+    private val conferenceMcpService: ConferenceMcpService,
+) {
+
+    // Expose all @Tool methods as MCP tools
+    @Bean
+    fun conferenceToolCallbacks(): List<org.springframework.ai.tool.ToolCallback> =
+        ToolCallbacks.from(conferenceMcpService).toList()
+}
