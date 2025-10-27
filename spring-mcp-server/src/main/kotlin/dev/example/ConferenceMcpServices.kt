@@ -4,24 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import jakarta.annotation.PostConstruct
-import org.springaicommunity.mcp.annotation.McpPrompt
-import org.springaicommunity.mcp.annotation.McpResource
-import org.springaicommunity.mcp.annotation.McpTool
-import org.springaicommunity.mcp.annotation.McpToolParam
-import org.springframework.ai.support.ToolCallbacks
-import org.springframework.ai.tool.annotation.Tool
-import org.springframework.ai.tool.annotation.ToolParam
+import io.modelcontextprotocol.server.McpSyncServerExchange
+import io.modelcontextprotocol.spec.McpSchema
+import io.modelcontextprotocol.spec.McpSchema.ProgressNotification
+import org.springaicommunity.mcp.annotation.*
 import org.springframework.ai.vectorstore.SearchRequest
 import org.springframework.ai.vectorstore.VectorStore
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ClassPathResource
-import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.component1
-import kotlin.collections.component2
+
 
 // MCP counterparts for Conference tools from spring-ai module
 
@@ -100,8 +92,22 @@ class ConferenceMcpService(
         description = "Performs a simple similarity search for conference sessions (title based) and returns matching results with a heuristic score."
     )
     fun searchSessions(
+        exchange: McpSyncServerExchange,
+        @McpProgressToken progressToken:String?,
         @McpToolParam(description = "The search query") query: String
     ): List<ConferenceSessionSearchResult> {
+        exchange.loggingNotification(
+            McpSchema.LoggingMessageNotification.builder()
+            .level(McpSchema.LoggingLevel.INFO)
+            .data("Start searching sessions for: $query")
+            .build())
+        progressToken?.let{
+            exchange.progressNotification(
+                ProgressNotification(
+                    progressToken, 0.0, 1.0, "Start searching sessions for $query "
+                )
+            )
+        }
         val searchRequest = SearchRequest.builder()
             .query(query)
             .similarityThreshold(0.3)
@@ -112,6 +118,14 @@ class ConferenceMcpService(
                 ConferenceSessionSearchResult(
                     title.toString(), documents.maxOf { it.score ?: 0.0 }
                 )
+            }.also {
+                progressToken?.let{
+                    exchange.progressNotification(
+                        ProgressNotification(
+                            progressToken, 1.0, 1.0, "Done searching sessions for $query "
+                        )
+                    )
+                }
             }
     }
 
