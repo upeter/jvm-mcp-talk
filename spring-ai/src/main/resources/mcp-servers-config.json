@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "italian-delight-tools": {
+      "command": "java",
+      "args": [
+        "-jar",
+        "/Users/urs/development/github/ai/kotlin-ai-talk/spring-mcp-server/target/spring-mcp-server-0.0.1-SNAPSHOT.jar"
+      ],
+      "env": {
+      }
+    }
+  }
+}
