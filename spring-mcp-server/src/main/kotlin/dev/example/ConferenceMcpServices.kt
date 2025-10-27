@@ -4,6 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import jakarta.annotation.PostConstruct
+import org.springaicommunity.mcp.annotation.McpPrompt
+import org.springaicommunity.mcp.annotation.McpResource
+import org.springaicommunity.mcp.annotation.McpTool
+import org.springaicommunity.mcp.annotation.McpToolParam
 import org.springframework.ai.support.ToolCallbacks
 import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.annotation.ToolParam
@@ -85,12 +90,12 @@ class ConferenceMcpService(
 ) {
 
     // Simple similarity search over titles based on containment and Jaccard score of words
-    @Tool(
+    @McpTool(
         name = "conference-session-search",
         description = "Performs a simple similarity search for conference sessions (title based) and returns matching results with a heuristic score."
     )
     fun searchSessions(
-        @ToolParam(description = "The search query") query: String
+        @McpToolParam(description = "The search query") query: String
     ): List<ConferenceSessionSearchResult> {
         val q = query.trim()
         if (q.isEmpty()) return emptyList()
@@ -111,46 +116,47 @@ class ConferenceMcpService(
             .take(10)
     }
 
-    @Tool(
+    @McpTool(
         name = "get-preferred-sessions",
         description = "Get all preferred sessions of the user."
     )
     fun getPreferredSessionsBy(
-        @ToolParam(description = "The conversation id to scope user preferences") conversationId: String
+        @McpToolParam(description = "The conversation id to scope user preferences") conversationId: String
     ): Set<ConferenceSession> = conferencePreferenceRepository.getPreferredSessionsBy(conversationId)
 
-    @Tool(
+    @McpTool(
         name = "add-preferred-sessions",
         description = "Add a session to preferences for the user"
     )
     fun addPreferenceSessions(
-        @ToolParam(description = "the session title of the session to add") sessionTitle: String,
-        @ToolParam(description = "The conversation id to scope user preferences") conversationId: String
+        @McpToolParam(description = "the session title of the session to add") sessionTitle: String,
+        @McpToolParam(description = "The conversation id to scope user preferences") conversationId: String
     ) {
         conferencePreferenceRepository.addToPreferenceSessions(conversationId, sessionTitle)
     }
 
-    @Tool(
+    @McpTool(
         name = "remove-preferred-sessions",
         description = "Remove a session from preferences for the user."
     )
     fun removePreferredSession(
-        @ToolParam(description = "the session title of the session to remove") sessionTitle: String,
-        @ToolParam(description = "The conversation id to scope user preferences") conversationId: String
+        @McpToolParam(description = "the session title of the session to remove") sessionTitle: String,
+        @McpToolParam(description = "The conversation id to scope user preferences") conversationId: String
     ) {
         conferencePreferenceRepository.removePreferredSession(conversationId, sessionTitle)
     }
 
-    @Tool(
+    @McpPrompt(
         name = "jfall-system-prompt",
         description = "Returns the JFall assistant system prompt used by the chat server."
     )
     fun jfallSystemPrompt(): String = SYSTEM_PROMPT
 
     // MCP Resource counterpart: expose the venue information as a retrievable blob
-    @Tool(
+    @McpResource(
         name = "general-venue-information-jfall",
-        description = "Returns general JFall 2025 venue information including address, dates, hotels, and the detailed session schedule in JSON form."
+        description = "Returns general JFall 2025 venue information including address, dates, hotels, and the detailed session schedule in JSON form.",
+        uri = "file:///data/dataset-jfall-venue.json"
     )
     fun getVenueInformation(): String = venueInformation
 
@@ -169,15 +175,16 @@ class ConferenceMcpService(
                     it.readText()
                 }
     }
+
 }
 
-@Configuration
-class ConferenceMcpConfig(
-    private val conferenceMcpService: ConferenceMcpService,
-) {
-
-    // Expose all @Tool methods as MCP tools
-    @Bean
-    fun conferenceToolCallbacks(): List<org.springframework.ai.tool.ToolCallback> =
-        ToolCallbacks.from(conferenceMcpService).toList()
-}
+//@Configuration
+//class ConferenceMcpConfig(
+//    private val conferenceMcpService: ConferenceMcpService,
+//) {
+//
+//    // Expose all @McpTool methods as MCP tools
+//    @Bean
+//    fun conferenceToolCallbacks(): List<org.springframework.ai.tool.ToolCallback> =
+//        ToolCallbacks.from(conferenceMcpService).toList()
+//}
