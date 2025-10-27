@@ -173,7 +173,6 @@ class ConferenceMcpService(
     fun getVenueInformation(): String = venueInformation.also { logger.info("Returning venue information.") }
 
     companion object {
-        // Copied from AIController.SYSTEM_PROMPT to avoid cross-module dependency
         private val SYSTEM_PROMPT = """
             You are a helper assistant for the JFall 2025 conference. 
             Respond in a friendly, helpful manner.

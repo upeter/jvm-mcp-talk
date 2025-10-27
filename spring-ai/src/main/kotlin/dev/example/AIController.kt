@@ -36,7 +36,6 @@ internal class AIController(
             .user(chatMessage.message)
             .toolContext(mapOf("progressToken" to "token-${nextInt()}", "conversationId" to chatMessage.conversationId))
             .toolCallbacks(mcpToolProvider)
-            //.tools(* mcpSyncClients.toTypedArray())
             //.tools(conferenceTools)
             //.toolContext(mapOf("conversationId" to chatMessage.conversationId))
             .advisors {
@@ -73,9 +72,7 @@ internal class AIController(
             .content()
 
         // 3. Convert the response to audio
-        val speechPrompt = SpeechPrompt(chatResponse ?: "I couldn't understand that. Please try again.")
-        val speechResponse = openAiAudioSpeechModel.call(speechPrompt)
-        return speechResponse.result.output
+        return openAiAudioSpeechModel.call(chatResponse ?: "I couldn't understand that. Please try again.")
     }
 
     companion object {
