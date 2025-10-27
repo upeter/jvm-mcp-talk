@@ -56,6 +56,9 @@ class AudioRecorder {
 
     fun startRecording() {
         try {
+            // Reset buffer for a fresh recording
+            byteArrayOutputStream.reset()
+
             val info = DataLine.Info(TargetDataLine::class.java, audioFormat)
             targetDataLine = AudioSystem.getLine(info) as TargetDataLine
             targetDataLine?.open(audioFormat)
