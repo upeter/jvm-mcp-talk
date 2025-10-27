@@ -12,12 +12,16 @@ import org.springaicommunity.mcp.annotation.McpToolParam
 import org.springframework.ai.support.ToolCallbacks
 import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.annotation.ToolParam
+import org.springframework.ai.vectorstore.SearchRequest
+import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 // MCP counterparts for Conference tools from spring-ai module
 
@@ -86,6 +90,7 @@ class ConferencePreferenceRepository {
 
 @Service
 class ConferenceMcpService(
+    val vectorStore: VectorStore,
     private val conferencePreferenceRepository: ConferencePreferenceRepository,
 ) {
 
@@ -97,23 +102,17 @@ class ConferenceMcpService(
     fun searchSessions(
         @McpToolParam(description = "The search query") query: String
     ): List<ConferenceSessionSearchResult> {
-        val q = query.trim()
-        if (q.isEmpty()) return emptyList()
-        val qTokens = q.lowercase().split(Regex("\\s+")).filter { it.isNotBlank() }.toSet()
-        val all = ConferencePreferenceRepository.sessions
-        return all.map { it.title }
-            .distinct()
-            .map { title ->
-                val titleTokens = title.lowercase().split(Regex("\\s+")).filter { it.isNotBlank() }.toSet()
-                val inter = qTokens.intersect(titleTokens).size.toDouble()
-                val union = (qTokens + titleTokens).size.toDouble()
-                val j = if (union == 0.0) 0.0 else inter / union
-                val containsBoost = if (title.contains(q, ignoreCase = true)) 0.5 else 0.0
-                ConferenceSessionSearchResult(title, (j + containsBoost).coerceAtMost(1.0))
+        val searchRequest = SearchRequest.builder()
+            .query(query)
+            .similarityThreshold(0.3)
+            .topK(10).build().also { logger.info("Query: ${query}") }
+        return vectorStore.similaritySearch(searchRequest)
+            .groupBy { it.metadata.getValue("title") }
+            .map { (title, documents) ->
+                ConferenceSessionSearchResult(
+                    title.toString(), documents.maxOf { it.score ?: 0.0 }
+                )
             }
-            .filter { it.score >= 0.3 }
-            .sortedByDescending { it.score }
-            .take(10)
     }
 
     @McpTool(
