@@ -19,6 +19,7 @@ import org.springframework.ai.tool.annotation.ToolParam
 import org.springframework.ai.vectorstore.SearchRequest
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.context.annotation.Lazy
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 import java.util.concurrent.ConcurrentHashMap
@@ -173,7 +174,7 @@ class SessionPreferenceRepository() {
 data class Dataset(val sessions: List<ConferenceSession> = emptyList())
 
 
-@Service
+@Component
 class McpClientHandlers(@Lazy private val chatClient: ChatClient)  // Lazy is needed to avoid circular dependency
     {
     @McpProgress(clients = ["conference-advisor-server"])
@@ -202,9 +203,6 @@ class McpClientHandlers(@Lazy private val chatClient: ChatClient)  // Lazy is ne
         return McpSchema.CreateMessageResult.builder().content(McpSchema.TextContent(llmResponse)).build()
     }
 
-    companion object {
-        private val logger: Logger = LoggerFactory.getLogger(McpClientHandlers::class.java)
-    }
 }
 
 
