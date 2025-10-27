@@ -2,6 +2,7 @@ package dev.example
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.modelcontextprotocol.client.McpSyncClient
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.explode
 import org.jetbrains.kotlinx.dataframe.api.flatten
@@ -203,14 +204,14 @@ class AiConfig {
     }
 }
 
-@Configuration(proxyBeanMethods = false)
-class ToolConfig(val conferenceTools: ConferenceTools) {
-    @Bean
-    fun conferenceToolsCallback(conferenceTools: ConferenceTools): ToolCallbackProvider {
-        return MethodToolCallbackProvider.builder().toolObjects(conferenceTools).build()
-    }
-
-}
+//@Configuration(proxyBeanMethods = false)
+//class ToolConfig(val conferenceTools: ConferenceTools) {
+//    @Bean
+//    fun conferenceToolsCallback(conferenceTools: ConferenceTools): ToolCallbackProvider {
+//        return MethodToolCallbackProvider.builder().toolObjects(conferenceTools).build()
+//    }
+//
+//}
 
 
 

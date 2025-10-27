@@ -4,20 +4,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.modelcontextprotocol.spec.McpSchema
 import kotlinx.collections.immutable.PersistentSet
 import kotlinx.collections.immutable.persistentSetOf
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springaicommunity.mcp.annotation.McpLogging
+import org.springaicommunity.mcp.annotation.McpProgress
+import org.springaicommunity.mcp.annotation.McpSampling
+import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.model.ToolContext
 import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.annotation.ToolParam
 import org.springframework.ai.vectorstore.SearchRequest
 import org.springframework.ai.vectorstore.VectorStore
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.orEmpty
-import kotlin.collections.toSet
 
 data class ConferenceSessionSearchResult(val title: String, val score: Double)
 
@@ -169,7 +173,39 @@ class SessionPreferenceRepository() {
 data class Dataset(val sessions: List<ConferenceSession> = emptyList())
 
 
+@Service
+class McpClientHandlers(@Lazy private val chatClient: ChatClient)  // Lazy is needed to avoid circular dependency
+    {
+    @McpProgress(clients = ["conference-advisor-server"])
+    fun progressHandler(progressNotification: McpSchema.ProgressNotification) {
+        logger.info(
+            "MCP PROGRESS: [{}] progress: {} total: {} message: {}", progressNotification.progressToken(),
+            progressNotification.progress(), progressNotification.total(), progressNotification.message()
+        )
+    }
 
+    @McpLogging(clients = ["conference-advisor-server"])
+    fun loggingHandler(loggingMessage: McpSchema.LoggingMessageNotification) {
+        logger.info("MCP LOGGING: [{}] {}", loggingMessage.level(), loggingMessage.data())
+    }
+
+    @McpSampling(clients = ["conference-advisor-server"])
+    fun samplingHandler(llmRequest: McpSchema.CreateMessageRequest): McpSchema.CreateMessageResult? {
+        logger.info("MCP SAMPLING: {}", llmRequest)
+
+        val llmResponse = chatClient.prompt()
+            .system(llmRequest.systemPrompt())
+            .user((llmRequest.messages().get(0).content() as McpSchema.TextContent).text())
+            .call()
+            .content()
+
+        return McpSchema.CreateMessageResult.builder().content(McpSchema.TextContent(llmResponse)).build()
+    }
+
+    companion object {
+        private val logger: Logger = LoggerFactory.getLogger(McpClientHandlers::class.java)
+    }
+}
 
 
 

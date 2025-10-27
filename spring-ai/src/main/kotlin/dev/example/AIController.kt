@@ -7,6 +7,7 @@ import org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID
 import org.springframework.ai.openai.OpenAiAudioSpeechModel
 import org.springframework.ai.openai.OpenAiAudioTranscriptionModel
 import org.springframework.ai.openai.audio.speech.SpeechPrompt
+import org.springframework.ai.tool.ToolCallbackProvider
 import org.springframework.core.io.InputStreamResource
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.util.*
+import kotlin.random.Random.Default.nextInt
 
 data class ChatMessage(val message: String, val conversationId: String)
 
@@ -21,7 +23,7 @@ data class ChatMessage(val message: String, val conversationId: String)
 internal class AIController(
     val openAiAudioSpeechModel: OpenAiAudioSpeechModel,
     val openAiAudioTranscriptionModel: OpenAiAudioTranscriptionModel,
-    val mcpSyncClients: List<McpSyncClient>,
+    val mcpToolProvider: ToolCallbackProvider,
     val chatClient: ChatClient,
     private val conferenceTools: ConferenceTools
 ) {
@@ -32,8 +34,11 @@ internal class AIController(
             .prompt()
             .system(SYSTEM_PROMPT)
             .user(chatMessage.message)
-            .tools(conferenceTools)
-            .toolContext(mapOf("conversationId" to chatMessage.conversationId))
+            .toolContext(mapOf("progressToken" to "token-${nextInt()}", "conversationId" to chatMessage.conversationId))
+            .toolCallbacks(mcpToolProvider)
+            //.tools(* mcpSyncClients.toTypedArray())
+            //.tools(conferenceTools)
+            //.toolContext(mapOf("conversationId" to chatMessage.conversationId))
             .advisors {
                 it.param(CONVERSATION_ID, chatMessage.conversationId)
             }
