@@ -8,8 +8,6 @@ import io.modelcontextprotocol.server.McpSyncServerExchange
 import io.modelcontextprotocol.spec.McpSchema
 import io.modelcontextprotocol.spec.McpSchema.ProgressNotification
 import org.springaicommunity.mcp.annotation.*
-import org.springframework.ai.chat.model.ToolContext
-import org.springframework.ai.mcp.McpToolUtils
 import org.springframework.ai.vectorstore.SearchRequest
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.core.io.ClassPathResource
@@ -135,11 +133,8 @@ class ConferenceMcpService(
         name = "get-preferred-sessions",
         description = "Get all preferred sessions of the user."
     )
-    fun getPreferredSessionsBy(
-        @McpToolParam(description = "The conversation id to scope user preferences", required = false) conversationId: String?,
-        exchange: McpSyncServerExchange
-    ): Set<ConferenceSession> {
-        val id = conversationId ?: exchange.sessionId()
+    fun getPreferredSessionsBy(exchange: McpSyncServerExchange): Set<ConferenceSession> {
+        val id = exchange.sessionId()
         return conferencePreferenceRepository.getPreferredSessionsBy(id).also { logger.info("Found ${it.size} preferred sessions for conversationId: $id") }
     }
 
@@ -147,11 +142,8 @@ class ConferenceMcpService(
         name = "add-preferred-sessions",
         description = "Add a session to preferences for the user"
     )
-    fun addPreferenceSessions(
-        @McpToolParam(description = "the session title of the session to add") sessionTitle: String,
-        @McpToolParam(description = "The conversation id to scope user preferences" , required = false) conversationId: String?,
-        exchange: McpSyncServerExchange) {
-        val id = conversationId ?: exchange.sessionId()
+    fun addPreferenceSessions(@McpToolParam(description = "the session title of the session to add") sessionTitle: String, exchange: McpSyncServerExchange) {
+        val id = exchange.sessionId()
         return conferencePreferenceRepository.addToPreferenceSessions( id, sessionTitle).also { logger.info("Added session: $sessionTitle to preferences for conversationId: $id")}
     }
 
@@ -160,11 +152,9 @@ class ConferenceMcpService(
         description = "Remove a session from preferences for the user."
     )
     fun removePreferredSession(
-        @McpToolParam(description = "the session title of the session to remove") sessionTitle: String,
-        @McpToolParam(description = "The conversation id to scope user preferences" , required = false) conversationId: String?,
-        exchange: McpSyncServerExchange
+        @McpToolParam(description = "the session title of the session to remove") sessionTitle: String, exchange: McpSyncServerExchange
     ) {
-        val id = conversationId ?: exchange.sessionId()
+        val id = exchange.sessionId()
         return conferencePreferenceRepository.removePreferredSession(id, sessionTitle).also { logger.info("Removed session: $sessionTitle from preferences for conversationId: $id")}
     }
 
@@ -172,13 +162,13 @@ class ConferenceMcpService(
         name = "jfall-advisor-prompt",
         description = "Returns the JFall assistant system prompt used by the chat server."
     )
-    fun jfallSystemPrompt(): String = SYSTEM_PROMPT.also { logger.info("Returning jfall prompt.") }
+    fun jfallAdvisorPrompt(): String = SYSTEM_PROMPT.also { logger.info("Returning jfall prompt.") }
 
     // MCP Resource counterpart: expose the venue information as a retrievable blob
     @McpResource(
         name = "general-venue-information-jfall",
         description = "Returns general JFall 2025 venue information including address, dates, hotels, and the detailed session schedule in JSON form.",
-        uri = "file:///data/dataset-jfall-venue.json"
+        uri = "static://data/dataset-jfall-venue.json"
     )
     fun getVenueInformation(): String = venueInformation.also { logger.info("Returning venue information.") }
 
