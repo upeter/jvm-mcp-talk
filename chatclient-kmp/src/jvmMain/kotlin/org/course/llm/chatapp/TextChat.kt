@@ -148,8 +148,8 @@ fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
     var messages by remember(conversationId) { mutableStateOf(listOf<ChatMessage>()) }
     var isLoading by remember(conversationId) { mutableStateOf(false) }
 
-    val audioRecorder = remember { AudioRecorder() }
-    DisposableEffect(conversationId) {
+    val audioRecorder = remember(conversationId) { AudioRecorder() }
+    DisposableEffect(audioRecorder) {
         onDispose {
             audioRecorder.cleanup()
         }

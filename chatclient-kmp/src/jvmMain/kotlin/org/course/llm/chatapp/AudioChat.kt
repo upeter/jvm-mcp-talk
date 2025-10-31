@@ -264,13 +264,18 @@ fun AudioChatScreen(httpClient: HttpClient, conversationId: String) {
     )
 
     // Create audio recorder and player
-    val audioRecorder = remember { AudioRecorder() }
+    val audioRecorder = remember(conversationId) { AudioRecorder() }
     val audioPlayer = remember { AudioPlayer() }
 
-    // Cleanup resources when the composable is disposed
-    DisposableEffect(Unit) {
+    // Cleanup recorder when the instance changes or is disposed
+    DisposableEffect(audioRecorder) {
         onDispose {
             audioRecorder.cleanup()
+        }
+    }
+    // Cleanup player when the composable is disposed
+    DisposableEffect(Unit) {
+        onDispose {
             audioPlayer.cleanup()
         }
     }
@@ -316,7 +321,7 @@ fun AudioChatScreen(httpClient: HttpClient, conversationId: String) {
                                 scope.launch {
                                     try {
                                         // Stop recording and get audio data
-                                        val audioData = audioRecorder.stopRecording()
+                                         val audioData = audioRecorder.stopRecording()
 
                                         // Save to temporary file (for multipart form data)
                                         val tempFile = withContext(Dispatchers.IO) {
