@@ -58,7 +58,7 @@ sealed class ChatBubbleStyle {
 
     object User : ChatBubbleStyle() {
         override val alignment = Alignment.CenterEnd
-        override val backgroundColor = Color(0xFFFF100D)
+        override val backgroundColor = Color.LightGray
         override val textColor = Color.DarkGray
     }
 
@@ -322,14 +322,26 @@ fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
                                             val response = httpClient.submitFormWithBinaryData(
                                                 url = "http://localhost:8082/audio-in-text-out-chat",
                                                 formData = formData {
+                                                    // Add the audio file part with explicit headers
                                                     append("audio", tempFile.readBytes(), Headers.build {
                                                         append(HttpHeaders.ContentType, "audio/mpeg")
                                                         append(HttpHeaders.ContentDisposition, "filename=\"${tempFile.name}\"")
                                                     })
+                                                    tempFile.delete()
+
+
+                                                    // Add the conversation ID part
                                                     append("conversationId", conversationId)
                                                 }
-                                            )
+                                            ) {
+                                                // Set the Accept header to application/octet-stream
+                                                header(HttpHeaders.Accept, ContentType.Application.OctetStream.toString())
+                                            }
 
+                                            // Check response status
+                                            if (response.status.value != 200) {
+                                                throw Exception("Server returned error: ${response.status.value} ${response.status.description}")
+                                            }
                                             val reply = response.body<TranscribedMessageReply>()
 
                                             messages = messages + ChatMessage(
