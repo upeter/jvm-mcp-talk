@@ -191,6 +191,10 @@ fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
                 if (inputText.isNotBlank() && !isLoading) {
                     val userMessage = ChatMessage(inputText, true)
                     messages = messages + userMessage
+                    // Immediately scroll to the newly added user message so it's visible
+                    scope.launch {
+                        listState.animateScrollToItem(messages.size - 1)
+                    }
                     isLoading = true
 
                     scope.launch {
