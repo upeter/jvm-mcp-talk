@@ -48,7 +48,7 @@ sealed class ChatBubbleStyle {
 
     object Agent : ChatBubbleStyle() {
         override val alignment = Alignment.CenterStart
-        override val backgroundColor = Color(0xFF8a63f9) // violet
+        override val backgroundColor = Color(0xFFFF100D)
         override val textColor = Color.White
     }
 }
@@ -110,7 +110,9 @@ fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
         // Progress bar
         if (isLoading) {
             LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                color = Color(0xFFFF100D),
+                trackColor = Color(0xFFFF100D).copy(alpha = 0.3f)
             )
         }
 
@@ -204,7 +206,8 @@ fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
                     .focusProperties {
                         previous = inputFieldFocus
                     },
-                enabled = !isLoading && inputText.isNotBlank()
+                enabled = !isLoading && inputText.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF100D))
             ) {
                 Text("Send")
             }

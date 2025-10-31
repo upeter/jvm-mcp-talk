@@ -35,12 +35,14 @@ internal class AIController(
             .system(SYSTEM_PROMPT)
             .user(chatMessage.message)
             .toolContext(mapOf("progressToken" to "token-${nextInt()}", "conversationId" to chatMessage.conversationId))
-            .toolCallbacks(mcpToolProvider)
-            //.tools(conferenceTools)
+            //.toolCallbacks(mcpToolProvider)
+            .tools(conferenceTools)
             //.toolContext(mapOf("conversationId" to chatMessage.conversationId))
             .advisors {
                 it.param(CONVERSATION_ID, chatMessage.conversationId)
             }
+
+
             .call()
             .content()
     }

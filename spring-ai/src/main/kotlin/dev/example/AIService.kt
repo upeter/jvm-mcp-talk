@@ -26,7 +26,7 @@ import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 import java.util.concurrent.ConcurrentHashMap
 
-data class ConferenceSessionSearchResult(val title: String, val score: Double)
+data class ConferenceSessionSearchResult(val title: String, val startsAt: String, val endsAt: String, val room: String, val speakers: List<String>, val score: Double)
 
 @Service
 class ConferenceTools(
@@ -47,9 +47,16 @@ class ConferenceTools(
         return vectorStore.similaritySearch(searchRequest)
             .groupBy { it.metadata.getValue("title") }
             .map { (title, documents) ->
-                ConferenceSessionSearchResult(
-                    title.toString(), documents.maxOf { it.score ?: 0.0 }
-                )
+                documents.maxBy { it.score ?: 0.0 }.let {
+                    ConferenceSessionSearchResult(
+                        title = title.toString(),
+                        startsAt = it.metadata.getValue("startsAtLocalDateTime").toString(),
+                        endsAt = it.metadata.getValue("endsAtLocalDateTime").toString(),
+                        room = it.metadata.getValue("room").toString(),
+                        speakers = it.metadata.getValue("speakers").toString().split(",").toList(),
+                        score = it.score ?: 0.0
+                        )
+                }
             }
     }
 
