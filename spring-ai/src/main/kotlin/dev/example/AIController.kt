@@ -36,8 +36,8 @@ internal class AIController(
             .system(SYSTEM_PROMPT)
             .user(chatMessage.message)
             .toolContext(mapOf("progressToken" to "token-${nextInt()}", "conversationId" to chatMessage.conversationId))
-            //.toolCallbacks(mcpToolProvider)
-            .tools(conferenceTools)
+            .toolCallbacks(mcpToolProvider)
+//            .tools(conferenceTools)
             //.toolContext(mapOf("conversationId" to chatMessage.conversationId))
             .advisors {
                 it.param(CONVERSATION_ID, chatMessage.conversationId)
@@ -103,7 +103,7 @@ internal class AIController(
             You are a helper assistant for the JFall 2025 conference. 
             Respond in a friendly, helpful manner, yet crisp manner.
             Objective: Assist the user in finding the best matching sessions for his preferences and provide relevant information about the conference.
-            Make use of tools to fetch relevant information about sessions, preferred sessions, and venue details.
+            Make use of tools to fetch relevant information about sessions, preferred sessions, venue details and speakers. Also include web searches.
             
             Only provide session information if the user requests it. If so:
              - Never list more than 3 sessions in the response. 

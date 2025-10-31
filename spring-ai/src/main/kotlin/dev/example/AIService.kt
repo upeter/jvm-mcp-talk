@@ -26,13 +26,28 @@ import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 import java.util.concurrent.ConcurrentHashMap
 
-data class ConferenceSessionSearchResult(val title: String, val startsAt: String, val endsAt: String, val room: String, val speakers: List<String>, val score: Double)
+data class ConferenceSessionSearchResult(
+    val title: String,
+    val startsAt: String,
+    val endsAt: String,
+    val room: String,
+    val speakers: List<String>,
+    val score: Double
+)
 
 @Service
 class ConferenceTools(
     val vectorStore: VectorStore,
     val conferencePreferenceRepository: SessionPreferenceRepository
 ) {
+
+    @Tool(
+        name = "general-venue-information-jfall",
+        description = "You provide general information aobut the Jall 2025 conference like location, address, ticket prices, hotels, dates, detailed session schedule, rooms etc."
+    )
+    fun getVenueInformation(): String = venueInformation
+
+
     @Tool(
         name = "conference-session-search",
         description = "Performs a similarity search for conference sessions and returns matching results with score."
@@ -55,16 +70,10 @@ class ConferenceTools(
                         room = it.metadata.getValue("room").toString(),
                         speakers = it.metadata.getValue("speakers").toString().split(",").toList(),
                         score = it.score ?: 0.0
-                        )
+                    )
                 }
             }
     }
-
-    @Tool(
-        name = "general-venue-information-jfall",
-        description = "You provide general information aobut the Jall 2025 conference like location, address, ticket prices, hotels, dates, detailed session schedule, rooms etc."
-    )
-    fun getVenueInformation(): String = venueInformation
 
 
     @Tool(
@@ -72,9 +81,10 @@ class ConferenceTools(
         description = "Get all preferred sessions of the user."
     )
     fun getPreferredSessionsBy(toolContext: ToolContext): Set<ConferenceSession> =
-        conferencePreferenceRepository.getPreferredSessionsBy(toolContext.context.getValue("conversationId").toString()).also {
-            logger.info("Found ${it.size} preferred sessions for conversationId: ${toolContext.context.getValue("conversationId")}")
-        }
+        conferencePreferenceRepository.getPreferredSessionsBy(toolContext.context.getValue("conversationId").toString())
+            .also {
+                logger.info("Found ${it.size} preferred sessions for conversationId: ${toolContext.context.getValue("conversationId")}")
+            }
 
     @Tool(
         name = "add-preferred-sessions",
@@ -86,7 +96,13 @@ class ConferenceTools(
     ) {
         conferencePreferenceRepository.addToPreferenceSessions(
             toolContext.context.getValue("conversationId").toString(), sessionTitle
-        ).also { logger.info("Added session: $sessionTitle to preferences for conversationId: ${toolContext.context.getValue("conversationId")}") }
+        ).also {
+            logger.info(
+                "Added session: $sessionTitle to preferences for conversationId: ${
+                    toolContext.context.getValue("conversationId")
+                }"
+            )
+        }
     }
 
     @Tool(
@@ -100,7 +116,13 @@ class ConferenceTools(
         conferencePreferenceRepository.removePreferredSession(
             toolContext.context.getValue("conversationId").toString(),
             sessionTitle
-        ).also { logger.info("Removed session: $sessionTitle from preferences for conversationId: ${toolContext.context.getValue("conversationId")}") }
+        ).also {
+            logger.info(
+                "Removed session: $sessionTitle from preferences for conversationId: ${
+                    toolContext.context.getValue("conversationId")
+                }"
+            )
+        }
     }
 
 
@@ -114,6 +136,7 @@ class ConferenceTools(
 
 
 }
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class ConferenceSession(
     val title: String,
