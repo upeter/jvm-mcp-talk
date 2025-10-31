@@ -176,38 +176,6 @@ class SessionPreferenceRepository() {
 data class Dataset(val sessions: List<ConferenceSession> = emptyList())
 
 
-@Component
-class McpClientHandlers(@Lazy private val chatClient: ChatClient)  // Lazy is needed to avoid circular dependency
-    {
-
-    @McpProgress(clients = ["conference-advisor-server"])
-    fun progressHandler(progressNotification: McpSchema.ProgressNotification) {
-        logger.info(
-            "MCP PROGRESS: [{}] progress: {} total: {} message: {}", progressNotification.progressToken(),
-            progressNotification.progress(), progressNotification.total(), progressNotification.message()
-        )
-    }
-
-    @McpLogging(clients = ["conference-advisor-server"])
-    fun loggingHandler(loggingMessage: McpSchema.LoggingMessageNotification) {
-        logger.info("MCP LOGGING: [{}] {}", loggingMessage.level(), loggingMessage.data())
-    }
-
-    @McpSampling(clients = ["conference-advisor-server"])
-    fun samplingHandler(llmRequest: McpSchema.CreateMessageRequest): McpSchema.CreateMessageResult? {
-        logger.info("MCP SAMPLING: {}", llmRequest)
-
-        val llmResponse = chatClient.prompt()
-            .system(llmRequest.systemPrompt())
-            .user((llmRequest.messages().get(0).content() as McpSchema.TextContent).text())
-            .call()
-            .content()
-
-        return McpSchema.CreateMessageResult.builder().content(McpSchema.TextContent(llmResponse)).build()
-    }
-
-}
-
 
 
 

@@ -171,56 +171,6 @@ class ConferenceMcpService(
     fun getVenueInformation(): String = venueInformation.also { logger.info("Returning venue information.") }
 
 
-    @McpTool(
-        name = "compose-schedule",
-        description = "Compose possible schedule for the user based on their preferences."
-    )
-    fun composeSchedule(exchange: McpSyncServerExchange): String {
-        val id = exchange.sessionId()
-
-        logger.info("Composing schedule for user: ${exchange.clientCapabilities}")
-        val samplingSystemMessage: String = """
-					You are analyzing a list of preferred conference sessions to evaluate the user’s current schedule.
-
-Your goals:
-1. **Detect overlaps** — Identify sessions that overlap in time.
-2. **Detect unfilled time slots** — Identify time periods during the conference day where no preferred session is scheduled.
-3. **If everything is consistent** — Present a clear summary of the final schedule in tabular form.
-
-Instructions:
-- Do not modify, remove, or propose new sessions.
-- Focus only on detecting and reporting issues.
-- If overlaps or gaps are found:
-  - Clearly list them under separate headings:
-    - “⚠️ Overlapping Sessions”
-    - “🕓 Unfilled Time Slots”
-- If no issues are found:
-  - Display a compact summary table with the following columns:
-    | Time Slot | Session Title | Room | Speaker |
-  - Sort sessions chronologically by start time.
-  - Keep the summary concise and well-formatted for easy readability.
-
-Respond only with factual findings — no explanations or recommendations for fixing the schedule.""".trimIndent()
-
-        val samplingResponse = exchange.createMessage(
-            CreateMessageRequest.builder()
-                .systemPrompt(samplingSystemMessage)
-                .messages(
-                    listOf(SamplingMessage(McpSchema.Role.USER,
-                            McpSchema.TextContent("""Here are the user's preferred sessions:
-                                |${conferencePreferenceRepository.getPreferredSessionsBy(id).joinToString("\n") { it.title }}
-                            """.trimMargin())
-                        )
-                    )
-                )
-                .modelPreferences(ModelPreferences.builder().addHint("openai").build())
-                .build()
-        )
-        return (samplingResponse.content as? TextContent)?.text ?: ""
-
-
-    }
-
     fun McpSyncServerExchange.info(message: String) {
         loggingNotification(LoggingMessageNotification.builder().level(LoggingLevel.INFO).data(message).build())
     }
