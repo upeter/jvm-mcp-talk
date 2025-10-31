@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusProperties
@@ -22,6 +23,7 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.animation.core.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -126,6 +128,20 @@ fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
     // Recorder + overlay states
     var showRecordOverlay by remember(conversationId) { mutableStateOf(false) }
     var isRecording by remember(conversationId) { mutableStateOf(false) }
+
+    // Animation for record button in overlay
+    val recordScale by animateFloatAsState(
+        targetValue = if (isRecording) 1.2f else 1f,
+        animationSpec = if (isRecording) {
+            infiniteRepeatable(
+                animation = tween(durationMillis = 500),
+                repeatMode = RepeatMode.Reverse
+            )
+        } else {
+            tween(durationMillis = 300)
+        },
+        label = "recordButtonScale"
+    )
 
     // Reset all UI state when the conversationId changes so previous messages disappear
     var inputText by remember(conversationId) { mutableStateOf("") }
@@ -247,7 +263,16 @@ fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
             }
 
             Button(
-                onClick = { if (!isLoading) { showRecordOverlay = true } },
+                onClick = {
+                    if (!isLoading) {
+                        // Show overlay and start recording immediately
+                        showRecordOverlay = true
+                        if (!isRecording) {
+                            isRecording = true
+                            audioRecorder.startRecording()
+                        }
+                    }
+                },
                 modifier = Modifier
                     .padding(end = 8.dp, bottom = 8.dp),
                 enabled = !isLoading,
@@ -273,7 +298,7 @@ fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
                     // Big circular record/stop button
                     Box(
                         modifier = Modifier
-                            .size(120.dp)
+                            .size(120.dp * recordScale)
                             .clip(CircleShape)
                             .background(if (isRecording) Color(0xFFFF100D) else Color.LightGray)
                             .clickable {
@@ -334,14 +359,20 @@ fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
                     Spacer(Modifier.height(16.dp))
 
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Button(onClick = {
-                            // Cancel overlay
-                            if (isRecording) {
-                                isRecording = false
-                                audioRecorder.stopRecording()
-                            }
-                            showRecordOverlay = false
-                        }) { Text("Cancel") }
+                        Button(
+                            onClick = {
+                                // Cancel overlay
+                                if (isRecording) {
+                                    isRecording = false
+                                    audioRecorder.stopRecording()
+                                }
+                                showRecordOverlay = false
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.DarkGray,
+                                contentColor = Color.White
+                            )
+                        ) { Text("Cancel") }
                     }
                 }
             }

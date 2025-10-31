@@ -300,10 +300,9 @@ fun AudioChatScreen(httpClient: HttpClient, conversationId: String) {
             // Record button
             Box(
                 modifier = Modifier
-                    .size(100.dp * animatedSize)
+                    .size(120.dp * animatedSize)
                     .clip(CircleShape)
-                    .background(if (isRecording) Color.Red else MaterialTheme.colorScheme.primary)
-                    .border(2.dp, Color.Gray, CircleShape)
+                    .background(if (isRecording) Color(0xFFFF100D) else Color.LightGray)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
@@ -380,9 +379,8 @@ fun AudioChatScreen(httpClient: HttpClient, conversationId: String) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "REC",
-                    color = Color.White,
-                    style = MaterialTheme.typography.headlineMedium
+                    text = if (isRecording) "Stop" else "Record",
+                    color = Color.White
                 )
             }
 
