@@ -189,7 +189,11 @@ fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
             // Function to send message
             val sendMessage = {
                 if (inputText.isNotBlank() && !isLoading) {
-                    val userMessage = ChatMessage(inputText, true)
+                    val textToSend = inputText
+                    // Clear input immediately after sending so the user sees an empty box
+                    inputText = ""
+
+                    val userMessage = ChatMessage(textToSend, true)
                     messages = messages + userMessage
                     // Immediately scroll to the newly added user message so it's visible
                     scope.launch {
@@ -201,7 +205,7 @@ fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
                         try {
                             val response = httpClient.post("http://localhost:8082/chat") {
                                 contentType(ContentType.Application.Json)
-                                setBody(ChatInput(inputText, conversationId))
+                                setBody(ChatInput(textToSend, conversationId))
                             }
 
                             val responseText = response.body<String>()
@@ -213,7 +217,6 @@ fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
                             messages = messages + ChatMessage("Error: ${e.message}", false)
                         } finally {
                             isLoading = false
-                            inputText = ""
                             // Return focus to input field after sending
                             inputFieldFocus.requestFocus()
                         }
