@@ -12,13 +12,14 @@ import org.springframework.core.io.InputStreamResource
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.util.*
 import kotlin.random.Random.Default.nextInt
 
 data class ChatMessage(val message: String, val conversationId: String)
-
+data class TranscribedMessageReply(val transcribedInputText: String, val outputText: String)
 @RestController
 internal class AIController(
     val openAiAudioSpeechModel: OpenAiAudioSpeechModel,
@@ -46,7 +47,8 @@ internal class AIController(
     }
 
     @PostMapping("/audio-in-text-out-chat", consumes = ["multipart/form-data"])
-    fun audioInTextOutChat(@RequestParam("audio") audioFile: MultipartFile, @RequestParam("conversationId", required = false) conversationId: String? = null):String? {
+    @ResponseBody
+    fun audioInTextOutChat(@RequestParam("audio") audioFile: MultipartFile, @RequestParam("conversationId", required = false) conversationId: String? = null):TranscribedMessageReply {
         // 1. Transcribe audio to text
         val transcriptionPrompt = AudioTranscriptionPrompt(object:InputStreamResource(audioFile.inputStream, "audio") {
             override fun getFilename(): String = UUID.randomUUID().toString().replace("-", "") + ".mp3"
@@ -56,10 +58,8 @@ internal class AIController(
 
         // 2. Call the chat method with the transcribed text
         val chatMessage = ChatMessage(transcribedText, conversationId ?: UUID.randomUUID().toString())
-        return chat(chatMessage)
+        return chat(chatMessage).let{TranscribedMessageReply(transcribedText, it?:"I couldn't understand that. Please try again.")}
     }
-
-
 
 
             @PostMapping("/audio-chat", consumes = ["multipart/form-data"], produces = ["application/octet-stream"])
