@@ -41,14 +41,28 @@ internal class AIController(
             .advisors {
                 it.param(CONVERSATION_ID, chatMessage.conversationId)
             }
-
-
             .call()
             .content()
     }
 
+    @PostMapping("/audio-in-text-out-chat", consumes = ["multipart/form-data"])
+    fun audioInTextOutChat(@RequestParam("audio") audioFile: MultipartFile, @RequestParam("conversationId", required = false) conversationId: String? = null):String? {
+        // 1. Transcribe audio to text
+        val transcriptionPrompt = AudioTranscriptionPrompt(object:InputStreamResource(audioFile.inputStream, "audio") {
+            override fun getFilename(): String = UUID.randomUUID().toString().replace("-", "") + ".mp3"
+        })
+        val transcriptionResponse = openAiAudioTranscriptionModel.call(transcriptionPrompt)
+        val transcribedText = transcriptionResponse.result.output
 
-    @PostMapping("/audio-chat", consumes = ["multipart/form-data"], produces = ["application/octet-stream"])
+        // 2. Call the chat method with the transcribed text
+        val chatMessage = ChatMessage(transcribedText, conversationId ?: UUID.randomUUID().toString())
+        return chat(chatMessage)
+    }
+
+
+
+
+            @PostMapping("/audio-chat", consumes = ["multipart/form-data"], produces = ["application/octet-stream"])
     fun audioChat(@RequestParam("audio") audioFile: MultipartFile, @RequestParam("conversationId", required = false) conversationId: String? = null): ByteArray {
         // 1. Transcribe audio to text
         val transcriptionPrompt = AudioTranscriptionPrompt(object:InputStreamResource(audioFile.inputStream, "audio"){
