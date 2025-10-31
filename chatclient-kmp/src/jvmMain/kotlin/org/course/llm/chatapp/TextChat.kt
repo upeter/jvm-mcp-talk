@@ -1,15 +1,19 @@
 package org.course.llm.chatapp
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusProperties
@@ -21,18 +25,28 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
 
 data class ChatMessage(
     val content: String,
     val isUserMessage: Boolean,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val customStyle: ChatBubbleStyle? = null
 )
 
 data class ChatInput(
     val message: String,
     val conversationId: String
+)
+
+data class TranscribedMessageReply(
+    val transcribedInputText: String,
+    val outputText: String
 )
 
 sealed class ChatBubbleStyle {
@@ -42,7 +56,7 @@ sealed class ChatBubbleStyle {
 
     object User : ChatBubbleStyle() {
         override val alignment = Alignment.CenterEnd
-        override val backgroundColor = Color.LightGray
+        override val backgroundColor = Color(0xFFFF100D)
         override val textColor = Color.DarkGray
     }
 
@@ -51,11 +65,19 @@ sealed class ChatBubbleStyle {
         override val backgroundColor = Color(0xFFFF100D)
         override val textColor = Color.White
     }
+
+    // Gray bubble for transcribed user input
+    object Transcribed : ChatBubbleStyle() {
+        override val alignment = Alignment.CenterEnd
+        override val backgroundColor = Color.LightGray
+        override val textColor = Color.DarkGray
+    }
 }
 
 @Composable
 fun ChatBubble(message: ChatMessage) {
-    val style = if (message.isUserMessage) ChatBubbleStyle.User else ChatBubbleStyle.Agent
+    val defaultStyle = if (message.isUserMessage) ChatBubbleStyle.User else ChatBubbleStyle.Agent
+    val style = message.customStyle ?: defaultStyle
     ChatBubbleWithStyle(message.content, style)
 }
 
@@ -100,13 +122,25 @@ fun ChatBubbleWithStyle(content: String, style: ChatBubbleStyle) {
 fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
-    
+
+    // Recorder + overlay states
+    var showRecordOverlay by remember(conversationId) { mutableStateOf(false) }
+    var isRecording by remember(conversationId) { mutableStateOf(false) }
+
     // Reset all UI state when the conversationId changes so previous messages disappear
     var inputText by remember(conversationId) { mutableStateOf("") }
     var messages by remember(conversationId) { mutableStateOf(listOf<ChatMessage>()) }
     var isLoading by remember(conversationId) { mutableStateOf(false) }
-    
-    Column(modifier = Modifier.fillMaxSize()) {
+
+    val audioRecorder = remember { AudioRecorder() }
+    DisposableEffect(conversationId) {
+        onDispose {
+            audioRecorder.cleanup()
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
         // Progress bar
         if (isLoading) {
             LinearProgressIndicator(
@@ -210,6 +244,106 @@ fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF100D))
             ) {
                 Text("Send")
+            }
+
+            Button(
+                onClick = { if (!isLoading) { showRecordOverlay = true } },
+                modifier = Modifier
+                    .padding(end = 8.dp, bottom = 8.dp),
+                enabled = !isLoading,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF100D))
+            ) {
+                Text("Rec")
+            }
+        }
+
+        }
+
+        // Recording overlay
+        if (showRecordOverlay) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xAA000000)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Big circular record/stop button
+                    Box(
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(CircleShape)
+                            .background(if (isRecording) Color(0xFFFF100D) else Color.LightGray)
+                            .clickable {
+                                if (!isRecording) {
+                                    isRecording = true
+                                    audioRecorder.startRecording()
+                                } else {
+                                    // Stop and send
+                                    isRecording = false
+                                    showRecordOverlay = false
+                                    isLoading = true
+                                    scope.launch {
+                                        try {
+                                            val audioData = audioRecorder.stopRecording()
+                                            val tempFile = withContext(Dispatchers.IO) {
+                                                val file = File.createTempFile("audio", ".mp3")
+                                                file.writeBytes(audioData)
+                                                file
+                                            }
+
+                                            val response = httpClient.submitFormWithBinaryData(
+                                                url = "http://localhost:8082/audio-in-text-out-chat",
+                                                formData = formData {
+                                                    append("audio", tempFile.readBytes(), Headers.build {
+                                                        append(HttpHeaders.ContentType, "audio/mpeg")
+                                                        append(HttpHeaders.ContentDisposition, "filename=\"${tempFile.name}\"")
+                                                    })
+                                                    append("conversationId", conversationId)
+                                                }
+                                            )
+
+                                            val reply = response.body<TranscribedMessageReply>()
+
+                                            messages = messages + ChatMessage(
+                                                reply.transcribedInputText,
+                                                isUserMessage = true,
+                                                customStyle = ChatBubbleStyle.Transcribed
+                                            )
+                                            messages = messages + ChatMessage(
+                                                reply.outputText,
+                                                isUserMessage = false
+                                            )
+
+                                            listState.animateScrollToItem(messages.size - 1)
+                                        } catch (e: Exception) {
+                                            messages = messages + ChatMessage("Error: ${e.message}", false)
+                                        } finally {
+                                            isLoading = false
+                                        }
+                                    }
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(if (isRecording) "Stop" else "Record", color = Color.White)
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Button(onClick = {
+                            // Cancel overlay
+                            if (isRecording) {
+                                isRecording = false
+                                audioRecorder.stopRecording()
+                            }
+                            showRecordOverlay = false
+                        }) { Text("Cancel") }
+                    }
+                }
             }
         }
     }
