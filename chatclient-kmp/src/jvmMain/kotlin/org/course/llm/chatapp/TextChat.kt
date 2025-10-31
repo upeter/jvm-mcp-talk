@@ -312,33 +312,13 @@ fun TextChatScreen(httpClient: HttpClient, conversationId: String) {
                                     isLoading = true
                                     scope.launch {
                                         try {
-                                            val audioData = audioRecorder.stopRecording()
-                                            val tempFile = withContext(Dispatchers.IO) {
-                                                val file = File.createTempFile("audio", ".mp3")
-                                                file.writeBytes(audioData)
-                                                file
-                                            }
-
-                                            val response = httpClient.submitFormWithBinaryData(
+                                            val response = uploadRecording(
+                                                audioRecorder = audioRecorder,
+                                                httpClient = httpClient,
                                                 url = "http://localhost:8082/audio-in-text-out-chat",
-                                                formData = formData {
-                                                    // Add the audio file part with explicit headers
-                                                    append("audio", tempFile.readBytes(), Headers.build {
-                                                        append(HttpHeaders.ContentType, "audio/mpeg")
-                                                        append(HttpHeaders.ContentDisposition, "filename=\"${tempFile.name}\"")
-                                                    })
-                                                    tempFile.delete()
+                                                conversationId = conversationId
+                                            )
 
-
-                                                    // Add the conversation ID part
-                                                    append("conversationId", conversationId)
-                                                }
-                                            ) {
-                                                // Set the Accept header to application/octet-stream
-                                                header(HttpHeaders.Accept, ContentType.Application.OctetStream.toString())
-                                            }
-
-                                            // Check response status
                                             if (response.status.value != 200) {
                                                 throw Exception("Server returned error: ${response.status.value} ${response.status.description}")
                                             }
