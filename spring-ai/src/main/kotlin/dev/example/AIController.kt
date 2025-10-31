@@ -1,6 +1,5 @@
 package dev.example
 
-import io.modelcontextprotocol.client.McpSyncClient
 import org.springframework.ai.audio.transcription.AudioTranscriptionPrompt
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID
@@ -8,6 +7,7 @@ import org.springframework.ai.openai.OpenAiAudioSpeechModel
 import org.springframework.ai.openai.OpenAiAudioTranscriptionModel
 import org.springframework.ai.openai.audio.speech.SpeechPrompt
 import org.springframework.ai.tool.ToolCallbackProvider
+import org.springframework.context.annotation.Lazy
 import org.springframework.core.io.InputStreamResource
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -24,7 +24,7 @@ internal class AIController(
     val openAiAudioSpeechModel: OpenAiAudioSpeechModel,
     val openAiAudioTranscriptionModel: OpenAiAudioTranscriptionModel,
     val mcpToolProvider: ToolCallbackProvider,
-    val chatClient: ChatClient,
+    @Lazy val  chatClient: ChatClient,
     private val conferenceTools: ConferenceTools
 ) {
 

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.modelcontextprotocol.client.McpSyncClient
 import io.modelcontextprotocol.spec.McpSchema
+import jakarta.annotation.PostConstruct
 import kotlinx.collections.immutable.PersistentSet
 import kotlinx.collections.immutable.persistentSetOf
 import org.slf4j.Logger
@@ -177,6 +179,7 @@ data class Dataset(val sessions: List<ConferenceSession> = emptyList())
 @Component
 class McpClientHandlers(@Lazy private val chatClient: ChatClient)  // Lazy is needed to avoid circular dependency
     {
+
     @McpProgress(clients = ["conference-advisor-server"])
     fun progressHandler(progressNotification: McpSchema.ProgressNotification) {
         logger.info(

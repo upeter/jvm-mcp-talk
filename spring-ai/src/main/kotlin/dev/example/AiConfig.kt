@@ -1,16 +1,8 @@
 package dev.example
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import io.modelcontextprotocol.client.McpSyncClient
 import org.jetbrains.kotlinx.dataframe.DataFrame
-import org.jetbrains.kotlinx.dataframe.api.explode
-import org.jetbrains.kotlinx.dataframe.api.flatten
-import org.jetbrains.kotlinx.dataframe.api.into
-import org.jetbrains.kotlinx.dataframe.api.map
-import org.jetbrains.kotlinx.dataframe.api.rename
-import org.jetbrains.kotlinx.dataframe.api.select
-import org.jetbrains.kotlinx.dataframe.io.read
+import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readJson
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor
@@ -28,12 +20,9 @@ import org.springframework.ai.openai.api.OpenAiAudioApi.SpeechRequest.AudioRespo
 import org.springframework.ai.openai.api.OpenAiAudioApi.TranscriptResponseFormat
 import org.springframework.ai.openai.api.OpenAiImageApi
 import org.springframework.ai.retry.RetryUtils
-import org.springframework.ai.tool.ToolCallbackProvider
 import org.springframework.ai.tool.execution.ToolExecutionException
 import org.springframework.ai.tool.execution.ToolExecutionExceptionProcessor
-import org.springframework.ai.tool.method.MethodToolCallbackProvider
 import org.springframework.ai.vectorstore.VectorStore
-import org.springframework.ai.vectorstore.pgvector.PgVectorStore
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -42,7 +31,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.queryForObject
 import org.springframework.web.client.RestClient
-import java.util.UUID
+import java.util.*
 
 
 @Configuration
