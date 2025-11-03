@@ -8,102 +8,18 @@ import org.springframework.stereotype.Service
 
 @Service
 class ConferenceMcpServer(
-    private val sessionSearchRepository: SessionSearchRepository,
-    private val sessionPreferenceRepository: SessionPreferenceRepository,
-) {
+    private val sessionSearchRepository: SessionSearchRepository) {
 
     // MCP Resource counterpart: expose the venue information as a retrievable blob
-    @McpResource(
-        name = "general-venue-information-jfall",
-        description = "Returns general JFall 2025 venue information including address, dates, hotels, and the detailed session schedule in JSON form.",
-        uri = "static://data/dataset-jfall-venue.json"
-    )
-    fun getVenueInformation(): String = venueInformation.also { logger.info("Returning venue information.") }
 
     // MCP Tool counterpart: similarity search for conference sessions
-    @McpTool(
-        name = "conference-session-search",
-        description = "Performs a simple similarity search for conference sessions (title based) and returns matching results with a heuristic score."
-    )
-    fun searchSessions(
-        exchange: McpSyncServerExchange,
-        @McpProgressToken progressToken: String?,
-        @McpToolParam(description = "The search query") query: String
-    ): List<ConferenceSessionSearchResult> {
-        exchange.loggingNotification(LoggingMessageNotification.builder()
-            .level(LoggingLevel.INFO)
-            .data("Start searching sessions for: $query").build())
-        progressToken?.let {
-            exchange.progressNotification(
-                ProgressNotification(progressToken, 0.0, 1.0, "Start searching sessions for $query ")
-            )
-        }
-        return sessionSearchRepository.searchSessions(query).also {
-            exchange.loggingNotification(LoggingMessageNotification.builder()
-                .level(LoggingLevel.INFO)
-                .data("Found ${it.size} sessions for: $query").build())
-
-            progressToken?.let {
-                exchange.progressNotification(
-                    ProgressNotification(
-                        progressToken, 1.0, 1.0, "Done searching sessions for $query "
-                    )
-                )
-            }
-        }
-    }
 
     // MCP System prompt counterpart: the JFall conference advisor prompt
-    @McpPrompt(
-        name = "jfall-advisor-prompt",
-        description = "Returns the JFall assistant system prompt used by the chat server."
-    )
-    fun jfallAdvisorPrompt(): String = MCP_PROMPT.also { logger.info("Returning jfall prompt.") }
 
 
 
 
 
-    @McpTool(
-        name = "get-preferred-sessions",
-        description = "Get all preferred sessions of the user."
-    )
-    fun getPreferredSessionsBy(exchange: McpSyncServerExchange): Set<ConferenceSession> {
-        val id = exchange.sessionId()
-        return sessionPreferenceRepository.getPreferredSessionsBy(id)
-            .also { logger.info("Found ${it.size} preferred sessions for conversationId: $id") }
-    }
-
-    @McpTool(
-        name = "add-preferred-sessions",
-        description = "Add a session to preferences for the user"
-    )
-    fun addPreferenceSessions(
-        @McpToolParam(description = "the session title of the session to add") sessionTitle: String,
-        exchange: McpSyncServerExchange
-    ) {
-        val id = exchange.sessionId()
-        return sessionPreferenceRepository.addToPreferenceSessions(id, sessionTitle)
-            .also { logger.info("Added session: $sessionTitle to preferences for conversationId: $id") }
-    }
-
-    @McpTool(
-        name = "remove-preferred-sessions",
-        description = "Remove a session from preferences for the user."
-    )
-    fun removePreferredSession(
-        @McpToolParam(description = "the session title of the session to remove") sessionTitle: String,
-        exchange: McpSyncServerExchange
-    ) {
-        val id = exchange.sessionId()
-        return sessionPreferenceRepository.removePreferredSession(id, sessionTitle)
-            .also { logger.info("Removed session: $sessionTitle from preferences for conversationId: $id") }
-    }
-
-
-    fun McpSyncServerExchange.info(message: String) {
-        loggingNotification(LoggingMessageNotification.builder().level(LoggingLevel.INFO).data(message).build())
-    }
 
     companion object {
         private val MCP_PROMPT = """
