@@ -82,17 +82,7 @@ internal class AIController(
         // 2. Call the chat method with the transcribed text
         val chatMessage = ChatMessage(transcribedText, conversationId ?: UUID.randomUUID().toString())
 
-        val chatResponse = chatClient
-            .prompt()
-            .system(SYSTEM_PROMPT_AUDIO)
-            .user(chatMessage.message)
-            .tools(conferenceTools)
-            .toolContext(mapOf("conversationId" to chatMessage.conversationId))
-            .advisors {
-                it.param(CONVERSATION_ID, chatMessage.conversationId)
-            }
-            .call()
-            .content()
+        val chatResponse = chat(chatMessage)
 
         // 3. Convert the response to audio
         return openAiAudioSpeechModel.call(chatResponse ?: "I couldn't understand that. Please try again.")

@@ -32,26 +32,13 @@ class ConferenceMcpServer(
     
         🧰 You have access to several tools. Use them wisely:
     
-        • Use `conference-session-search` 
-          → When the user wants to explore sessions based on a topic, speaker, or interest. 
-          → Example: "Find sessions about Kotlin", "Are there talks on machine learning?"
-    
-        • Use `get-preferred-sessions` 
-          → When the user asks to view their current preferred sessions or saved talks. 
-          → Example: "What are my favorite sessions?", "Show my preferences."
-    
-        • Use `add-preferred-sessions` 
-          → When the user wants to add a session to their personal list. 
-          → The user will typically mention a session title they like.
-          → Example: "Add 'Jetpack Compose in Production' to my list"
-    
-        • Use `remove-preferred-sessions` 
-          → When the user wants to remove a session from their preferences.
-          → Example: "Remove the session about coroutines"
-    
         • Use `general-venue-information-jfall` 
           → When the user asks about practical or logistical details about the event, such as location, time, hotels, or schedule.
     
+        • Use `conference-session-search` 
+          → When the user wants to explore sessions based on a topic, speaker, or interest. 
+          → Example: "Find sessions about Kotlin", "Are there talks on machine learning?"
+      
         🤖 Response guidelines:
         - Use tools when needed to gather up-to-date or personalized information.
         - Keep answers short, friendly, and informative.
