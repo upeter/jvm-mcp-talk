@@ -25,7 +25,6 @@ internal class AIController(
     val openAiAudioSpeechModel: OpenAiAudioSpeechModel,
     val openAiAudioTranscriptionModel: OpenAiAudioTranscriptionModel,
     @Lazy val  chatClient: ChatClient,
-    val mcpToolProvider: ToolCallbackProvider,
     val conferenceTools: ConferenceTools
 ) {
 
@@ -36,10 +35,7 @@ internal class AIController(
             .prompt()
             .system(SYSTEM_PROMPT)
             .user(chatMessage.message)
-            .toolContext(mapOf("conversationId" to chatMessage.conversationId))
-//            .toolContext(mapOf("progressToken" to "token-${nextInt()}", "conversationId" to chatMessage.conversationId))
             .tools(conferenceTools)
-//            .toolCallbacks(mcpToolProvider)
             .advisors {
                 it.param(CONVERSATION_ID, chatMessage.conversationId)
             }
