@@ -11,7 +11,7 @@
 //      "command": "java",
 //      "args":["-jar", "/Users/urs/.m2/repository/org/course/mcp/1.0/mcp-1.0.jar"]
 //    },
-//    "jfall-conference-advisor": {
+//    "kdd-conference-advisor": {
 //      "command": "java",
 //      "args":["-jar", "/Users/urs/.m2/repository/com/example/spring-mcp-server/0.0.1-SNAPSHOT/spring-mcp-server-0.0.1-SNAPSHOT.jar"]
 //    },
@@ -19,14 +19,14 @@
 //      "command": "npx",
 //      "args": ["-y", "supergateway", "--sse", "http://localhost:3001/sse"]
 //    },
-//    "jfall-conference-advisor": {
+//    "kdd-conference-advisor": {
 //      "command": "java",
 //      "args":["-jar",
 //        "-DOPENAI_API_KEY=${env:OPENAI_API_KEY}",
 //        "-Dspring.profiles.active=default,stdio",
 //        "/Users/urs/.m2/repository/com/example/spring-mcp-server/0.0.1-SNAPSHOT/spring-mcp-server-0.0.1-SNAPSHOT.jar"]
 //    },
-    "jfall-conference-advisor": {
+    "kdd-conference-advisor": {
       "command": "java",
       "args":[
         "-jar",

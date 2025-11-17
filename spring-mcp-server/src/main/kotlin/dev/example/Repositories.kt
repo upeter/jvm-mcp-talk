@@ -101,7 +101,7 @@ class SessionPreferenceRepository {
         private val mapper: ObjectMapper = jacksonObjectMapper()
         internal val sessions: List<ConferenceSession> = run {
             val dataset: Dataset = mapper.readValue(
-                ClassPathResource("data/dataset-jfall-venue.json").inputStream
+                ClassPathResource("data/dataset-kdd-venue.json").inputStream
             )
             dataset.sessions
         }

@@ -76,7 +76,7 @@ class AiConfig {
         .model(OpenAiAudioApi.TtsModel.TTS_1.getValue())
         .responseFormat(AudioResponseFormat.MP3)
         .voice(OpenAiAudioApi.SpeechRequest.Voice.ALLOY)
-        .speed(1.0f)
+        .speed(1.0)
         .build()
 
     @Bean
@@ -133,19 +133,20 @@ class AiConfig {
         }
         logger.info("Embedding Model used: $embeddingModel")
         val doCount  =  {
-            val sql = "SELECT count(*) FROM public.talks_"
+            val sql = "SELECT count(*) FROM public.talks"
             runCatching {  jdbcTemplate.queryForObject<Int>(sql) }.getOrElse{0}
         }
 
 
         return ApplicationRunner { args: ApplicationArguments? ->
+            //jdbcTemplate.execute("TRUNCATE TABLE public.talks")
             val count:Int = doCount()
             val startTime = System.currentTimeMillis()
             if (count > 0) {
-                logger.info("${count} sessions embeddings already present in public.talks_")
+                logger.info("${count} sessions embeddings already present in public.talks")
             } else {
-                logger.info("Start ingesting sessions in public.talks_...   ")
-                val df = DataFrame.readJson("spring-ai/src/main/resources/data/dataset-jfall.json")
+                logger.info("Start ingesting sessions in public.talks...   ")
+                val df = DataFrame.readJson("spring-ai/src/main/resources/data/dataset-kdd.json")
                 val sessions = df.explode("sessions").select("sessions").rename("sessions").into("session").flatten()
                 val conferenceDaysSorted = sessions
                     .map { java.time.Instant.parse(it["startsAt"].toString()).atZone(zone).toLocalDate() }

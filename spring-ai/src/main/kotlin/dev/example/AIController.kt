@@ -5,7 +5,7 @@ import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID
 import org.springframework.ai.openai.OpenAiAudioSpeechModel
 import org.springframework.ai.openai.OpenAiAudioTranscriptionModel
-import org.springframework.ai.openai.audio.speech.SpeechPrompt
+import org.springframework.ai.openai.api.OpenAiAudioApi
 import org.springframework.ai.tool.ToolCallbackProvider
 import org.springframework.context.annotation.Lazy
 import org.springframework.core.io.InputStreamResource
@@ -57,9 +57,7 @@ internal class AIController(
     @ResponseBody
     fun audioInTextOutChat(@RequestParam("audio") audioFile: MultipartFile, @RequestParam("conversationId", required = false) conversationId: String? = null):TranscribedMessageReply {
         // 1. Transcribe audio to text
-        val transcriptionPrompt = AudioTranscriptionPrompt(object:InputStreamResource(audioFile.inputStream, "audio") {
-            override fun getFilename(): String = UUID.randomUUID().toString().replace("-", "") + ".mp3"
-        })
+        val transcriptionPrompt = AudioTranscriptionPrompt(audioFile.resource)
         val transcriptionResponse = openAiAudioTranscriptionModel.call(transcriptionPrompt)
         val transcribedText = transcriptionResponse.result.output
 
@@ -72,10 +70,7 @@ internal class AIController(
             @PostMapping("/audio-chat", consumes = ["multipart/form-data"], produces = ["application/octet-stream"])
     fun audioChat(@RequestParam("audio") audioFile: MultipartFile, @RequestParam("conversationId", required = false) conversationId: String? = null): ByteArray {
         // 1. Transcribe audio to text
-        val transcriptionPrompt = AudioTranscriptionPrompt(object:InputStreamResource(audioFile.inputStream, "audio"){
-            override fun getFilename(): String = UUID.randomUUID().toString().replace("-", "") + ".mp3"
-        })
-
+        val transcriptionPrompt = AudioTranscriptionPrompt(audioFile.resource)
         val transcriptionResponse = openAiAudioTranscriptionModel.call(transcriptionPrompt)
         val transcribedText = transcriptionResponse.result.output
 
@@ -90,14 +85,14 @@ internal class AIController(
 
     companion object {
         val SYSTEM_PROMPT = """
-            You are a helper assistant for the JFall 2025 conference. 
+            You are a helper assistant for the KotlinDevDay 2025 conference. 
             Respond in a friendly, helpful manner.
             Objective: Assist the user in finding the best matching sessions for his preferences and provide relevant information about the conference.
             Make use of tools to fetch relevant information about sessions, speakers, and venue details.
             """
 
         val SYSTEM_PROMPT_AUDIO = """
-            You are a helper assistant for the JFall 2025 conference. 
+            You are a helper assistant for the KotlinDevDay 2025 conference. 
             Respond in a friendly, helpful manner, yet crisp manner.
             Objective: Assist the user in finding the best matching sessions for his preferences and provide relevant information about the conference.
             Make use of tools to fetch relevant information about sessions, preferred sessions, venue details and speakers. Also include web searches.

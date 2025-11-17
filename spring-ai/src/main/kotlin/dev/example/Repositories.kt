@@ -86,7 +86,7 @@ class SessionSearchRepository(val vectorStore: VectorStore) {
             private val sessions: List<ConferenceSession> = run {
                 val dataset: Dataset = mapper.readValue(
                     SessionPreferenceRepository::class.java
-                        .getResourceAsStream("/data/dataset-jfall-venue.json")
+                        .getResourceAsStream("/data/dataset-kdd-venue.json")
                 )
                 dataset.sessions
             }

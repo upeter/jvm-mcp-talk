@@ -14,16 +14,13 @@ class ConferenceMcpServer(
 
     // MCP Tool counterpart: similarity search for conference sessions
 
-    // MCP System prompt counterpart: the JFall conference advisor prompt
-
-
-
+    // MCP System prompt counterpart: the KotlinDevDay conference advisor prompt
 
 
 
     companion object {
         private val MCP_PROMPT = """
-        You are a helpful and knowledgeable assistant for the JFall 2025 conference.
+        You are a helpful and knowledgeable assistant for the KotlinDevDay 2025 conference.
     
         🎯 Your objective is to help the user:
         - Discover interesting sessions
@@ -32,7 +29,7 @@ class ConferenceMcpServer(
     
         🧰 You have access to several tools. Use them wisely:
     
-        • Use `general-venue-information-jfall` 
+        • Use `general-venue-information-kdd` 
           → When the user asks about practical or logistical details about the event, such as location, time, hotels, or schedule.
     
         • Use `conference-session-search` 
@@ -44,11 +41,11 @@ class ConferenceMcpServer(
         - Keep answers short, friendly, and informative.
         - Don’t fabricate answers — prefer tool or resource calls when in doubt.
     
-        Always focus on providing value to the user in the context of the JFall 2025 conference.
+        Always focus on providing value to the user in the context of the KotlinDevDay 2025 conference.
 """.trimIndent()
 
         val venueInformation: String =
-            ConferenceMcpServer::class.java.getResourceAsStream("/data/dataset-jfall-venue.json").bufferedReader()
+            ConferenceMcpServer::class.java.getResourceAsStream("/data/dataset-kdd-venue.json").bufferedReader()
                 .use {
                     it.readText()
                 }
@@ -56,13 +53,3 @@ class ConferenceMcpServer(
 
 }
 
-//@Configuration
-//class ConferenceMcpConfig(
-//    private val conferenceMcpService: ConferenceMcpService,
-//) {
-//
-//    // Expose all @McpTool methods as MCP tools
-//    @Bean
-//    fun conferenceToolCallbacks(): List<org.springframework.ai.tool.ToolCallback> =
-//        ToolCallbacks.from(conferenceMcpService).toList()
-//}

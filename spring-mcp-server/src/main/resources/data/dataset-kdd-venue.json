@@ -1,0 +1,406 @@
+{
+  "eventName": "Kotlin Dev Day Amsterdam 2025",
+  "address": "Circa Amsterdam, Seineweg 2, 1043 BG Amsterdam",
+  "dateFrom": "2025-11-27",
+  "dateTo": "2025-11-27",
+  "startTime": "09:00",
+  "endTime": "18:00",
+  "price": {
+    "superEarlyBird": "€199 (Super Early bird)",
+    "earlyBird": "€249 (early bird)",
+    "regular": "€299 (regular)",
+    "groups": "20% discount for groups (> 3)",
+    "workshop": "€240 (workshop) "
+  },
+  "officialWebsite": "https://kotlindevday.com/",
+  "venueWebsite": "https://circa.nl/en/",
+  "sessions": [
+    {
+      "title": "What’s New in Kotlin: Language and Ecosystem Strategy",
+      "startsAt": "2025-11-27T09:30:00.0000000Z",
+      "endsAt": "2025-11-27T10:15:00.0000000Z",
+      "category": [
+        "Keynote"
+      ],
+      "room": "Black Box",
+      "speakers": [
+        "Michail Zarečenskij"
+      ]
+    },
+    {
+      "title": "47 Refactorings in 45 Minutes",
+      "startsAt": "2025-11-27T10:30:00.0000000Z",
+      "endsAt": "2025-11-27T11:15:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "Black Box",
+      "speakers": [
+        "Duncan McGregor",
+        "Dmitry Kandalov"
+      ]
+    },
+    {
+      "title": "KotlinJS and why I love it",
+      "startsAt": "2025-11-27T10:30:00.0000000Z",
+      "endsAt": "2025-11-27T11:15:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 1",
+      "speakers": [
+        "Matthias Geisler"
+      ]
+    },
+    {
+      "title": "How to kill JavaScript from your Stack with HTMX and Kotlin",
+      "startsAt": "2025-11-27T10:30:00.0000000Z",
+      "endsAt": "2025-11-27T11:15:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 7",
+      "speakers": [
+        "Frederik Pietzko"
+      ]
+    },
+    {
+      "title": "Building AI agents in Kotlin with Koog",
+      "startsAt": "2025-11-27T11:30:00.0000000Z",
+      "endsAt": "2025-11-27T12:15:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "Black Box",
+      "speakers": [
+        "Sebastian Aigner"
+      ]
+    },
+    {
+      "title": "Simple Parser Combinator in Kotlin",
+      "startsAt": "2025-11-27T11:30:00.0000000Z",
+      "endsAt": "2025-11-27T12:15:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "Upperdeck",
+      "speakers": [
+        "Elmar Wachtmeester"
+      ]
+    },
+    {
+      "title": "FP and OOP: Best Friends Forever?",
+      "startsAt": "2025-11-27T11:30:00.0000000Z",
+      "endsAt": "2025-11-27T12:15:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 2",
+      "speakers": [
+        "Dirk Groot"
+      ]
+    },
+    {
+      "title": "Making Spring Boot, OpenAPI, and @Transactional play nice with Arrow's Either",
+      "startsAt": "2025-11-27T11:30:00.0000000Z",
+      "endsAt": "2025-11-27T12:15:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 7",
+      "speakers": [
+        "Tjalling Ran"
+      ]
+    },
+    {
+      "title": "Can LLMs play text adventures? – Kotlin edition",
+      "startsAt": "2025-11-27T12:30:00.0000000Z",
+      "endsAt": "2025-11-27T13:00:00.0000000Z",
+      "category": [
+        "Fast Forward"
+      ],
+      "room": "Black Box",
+      "speakers": [
+        "Bouke Nijhuis"
+      ]
+    },
+    {
+      "title": "Exploring and Analyzing Data as a Kotlin Developer",
+      "startsAt": "2025-11-27T12:30:00.0000000Z",
+      "endsAt": "2025-11-27T13:00:00.0000000Z",
+      "category": [
+        "Fast Forward"
+      ],
+      "room": "Upperdeck",
+      "speakers": [
+        "Jolan Rensen"
+      ]
+    },
+    {
+      "title": "Vibe code a Kotlin compiler plugin",
+      "startsAt": "2025-11-27T12:30:00.0000000Z",
+      "endsAt": "2025-11-27T13:00:00.0000000Z",
+      "category": [
+        "Fast Forward"
+      ],
+      "room": "SUB 1",
+      "speakers": [
+        "Willem Veelenturf"
+      ]
+    },
+    {
+      "title": "Deprecate symbols from your libraries… Why and how?",
+      "startsAt": "2025-11-27T12:30:00.0000000Z",
+      "endsAt": "2025-11-27T13:00:00.0000000Z",
+      "category": [
+        "Fast Forward"
+      ],
+      "room": "SUB 2",
+      "speakers": [
+        "Alexander Likhachev"
+      ]
+    },
+    {
+      "title": "Javascript is Dead: the Past, Present, and Future of Full‑stack Development",
+      "startsAt": "2025-11-27T12:30:00.0000000Z",
+      "endsAt": "2025-11-27T13:00:00.0000000Z",
+      "category": [
+        "Fast Forward"
+      ],
+      "room": "SUB 7",
+      "speakers": [
+        "Bruce Hamilton"
+      ]
+    },
+    {
+      "title": "Supercharge your LLM with Kotlin 💪: Model Context Protocol (MCP) in Action",
+      "startsAt": "2025-11-27T14:00:00.0000000Z",
+      "endsAt": "2025-11-27T14:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "Black Box",
+      "speakers": [
+        "Urs Peter"
+      ]
+    },
+    {
+      "title": "Lessons learned after building apps with Kotlin Multiplatform",
+      "startsAt": "2025-11-27T14:00:00.0000000Z",
+      "endsAt": "2025-11-27T14:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "Upperdeck",
+      "speakers": [
+        "Marco Gomiero"
+      ]
+    },
+    {
+      "title": "Beyond data classes: Kotlin‑powered domain modeling",
+      "startsAt": "2025-11-27T14:00:00.0000000Z",
+      "endsAt": "2025-11-27T14:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 1",
+      "speakers": [
+        "Rafał Maciak"
+      ]
+    },
+    {
+      "title": "Let’s use IntelliJ as a game engine, just because we can",
+      "startsAt": "2025-11-27T14:00:00.0000000Z",
+      "endsAt": "2025-11-27T14:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 2",
+      "speakers": [
+        "Alexander Chatzizacharias"
+      ]
+    },
+    {
+      "title": "Snake in 10 Lines of Kotlin: Learning More by Coding Less",
+      "startsAt": "2025-11-27T14:00:00.0000000Z",
+      "endsAt": "2025-11-27T14:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 7",
+      "speakers": [
+        "Guus de Wit"
+      ]
+    },
+    {
+      "title": "Build your own NES Emulator... with Kotlin",
+      "startsAt": "2025-11-27T15:00:00.0000000Z",
+      "endsAt": "2025-11-27T15:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "Black Box",
+      "speakers": [
+        "Artur Skowroński"
+      ]
+    },
+    {
+      "title": "Building a Modern Kotlin Multiplatform Application with Compose Multiplatform and Koin",
+      "startsAt": "2025-11-27T15:00:00.0000000Z",
+      "endsAt": "2025-11-27T15:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "Upperdeck",
+      "speakers": [
+        "Arnaud Giuliani"
+      ]
+    },
+    {
+      "title": "Bullseye or Backfire? Arrow in Kotlin Without the Poison",
+      "startsAt": "2025-11-27T15:00:00.0000000Z",
+      "endsAt": "2025-11-27T15:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 1",
+      "speakers": [
+        "Mehmet Akif Tütüncü"
+      ]
+    },
+    {
+      "title": "Kotlin Meets AI: How Agents Reshaped the Way I Build Projects",
+      "startsAt": "2025-11-27T15:00:00.0000000Z",
+      "endsAt": "2025-11-27T15:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 2",
+      "speakers": [
+        "Grigory Panov"
+      ]
+    },
+    {
+      "title": "Kotlin Clean Architecture for Serverless: Business Logic You Can Take Anywhere",
+      "startsAt": "2025-11-27T15:00:00.0000000Z",
+      "endsAt": "2025-11-27T15:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 7",
+      "speakers": [
+        "Elena van Engelen"
+      ]
+    },
+    {
+      "title": "Exploring improvements to 'when'",
+      "startsAt": "2025-11-27T16:00:00.0000000Z",
+      "endsAt": "2025-11-27T16:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "Black Box",
+      "speakers": [
+        "Alejandro Serrano Mena"
+      ]
+    },
+    {
+      "title": "Rediscovering Apollo 11: Using Spring AI to Explore the trip to the moon!",
+      "startsAt": "2025-11-27T16:00:00.0000000Z",
+      "endsAt": "2025-11-27T16:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "Upperdeck",
+      "speakers": [
+        "Raphael De Lio"
+      ]
+    },
+    {
+      "title": "wAIred! Learn with(out) AI",
+      "startsAt": "2025-11-27T16:00:00.0000000Z",
+      "endsAt": "2025-11-27T16:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 1",
+      "speakers": [
+        "Simone de Gijt"
+      ]
+    },
+    {
+      "title": "Coding at the Speed of Thought: Kotlin, Compose, and the Power of Vim",
+      "startsAt": "2025-11-27T16:00:00.0000000Z",
+      "endsAt": "2025-11-27T16:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 7",
+      "speakers": [
+        "Oday Maleh"
+      ]
+    },
+    {
+      "title": "Roundtable: Kotlin by JetBrains, present and future",
+      "startsAt": "2025-11-27T17:00:00.0000000Z",
+      "endsAt": "2025-11-27T17:45:00.0000000Z",
+      "category": [
+        "Roundtable"
+      ],
+      "room": "Black Box",
+      "speakers": [
+        "Sebastian Aigner",
+        "Michail Zarečensʹkij"
+      ]
+    },
+    {
+      "title": "Kotlin multiplatform + Domain models = ❤",
+      "startsAt": "2025-11-27T11:30:00.0000000Z",
+      "endsAt": "2025-11-27T12:15:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 1",
+      "speakers": [
+        "Nico Krijnen"
+      ]
+    },
+    {
+      "title": "Framework-Free, Future-Proof: Isolated DDD in Kotlin with (and without) Spring",
+      "startsAt": "2025-11-27T10:30:00.0000000Z",
+      "endsAt": "2025-11-27T11:15:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "Upperdeck",
+      "speakers": [
+        "Jerre van Veluw"
+      ]
+    },
+    {
+      "title": "Own your design: functional principles vs framework",
+      "startsAt": "2025-11-27T10:30:00.0000000Z",
+      "endsAt": "2025-11-27T11:15:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 2",
+      "speakers": [
+        "Tiberiu Tofan"
+      ]
+    },
+    {
+      "title": "KtLint behind the scenes. Why it matters and how to extend it.",
+      "startsAt": "2025-11-27T16:00:00.0000000Z",
+      "endsAt": "2025-11-27T16:45:00.0000000Z",
+      "category": [
+        "Presentation"
+      ],
+      "room": "SUB 2",
+      "speakers": [
+        "Paul Dingemans"
+      ]
+    }
+  ]
+}
+
