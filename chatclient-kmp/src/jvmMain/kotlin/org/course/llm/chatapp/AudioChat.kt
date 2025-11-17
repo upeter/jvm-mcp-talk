@@ -137,7 +137,7 @@ class AudioRecorder {
 
                 // Convert WAV to MP3 using lame
                 val process = ProcessBuilder(
-                    "lame", "--preset", "standard", 
+                    "/opt/homebrew/bin/lame", "--preset", "standard",
                     tempWavFile.absolutePath, tempMp3File.absolutePath
                 ).start()
 
