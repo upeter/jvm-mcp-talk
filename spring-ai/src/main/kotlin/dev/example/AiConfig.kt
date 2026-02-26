@@ -76,7 +76,7 @@ class AiConfig {
         .model(OpenAiAudioApi.TtsModel.TTS_1.getValue())
         .responseFormat(AudioResponseFormat.MP3)
         .voice(OpenAiAudioApi.SpeechRequest.Voice.ALLOY)
-        .speed(1.0)
+        .speed(1.0f)
         .build()
 
     @Bean
