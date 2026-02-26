@@ -23,6 +23,7 @@ import org.springframework.ai.retry.RetryUtils
 import org.springframework.ai.tool.execution.ToolExecutionException
 import org.springframework.ai.tool.execution.ToolExecutionExceptionProcessor
 import org.springframework.ai.vectorstore.VectorStore
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Bean
@@ -31,8 +32,6 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.queryForObject
 import org.springframework.web.client.RestClient
 import java.util.*
-import com.langfuse.client.LangfuseClient
-import org.springframework.beans.factory.annotation.Value
 
 
 @Configuration
@@ -102,20 +101,6 @@ class AiConfig {
 
     @Bean
     fun webClient() = RestClient.builder().build()
-
-    @Bean
-    fun langfuseClient(
-        @Value("\${LANGFUSE_BASE_URL:https://cloud.langfuse.com}") baseUrl: String,
-        @Value("\${LANGFUSE_PUBLIC_KEY}") publicKey: String,
-        @Value("\${LANGFUSE_SECRET_KEY}") secretKey: String,
-    ): LangfuseClient {
-        require(publicKey.isNotBlank()) { "LANGFUSE_PUBLIC_KEY must be set" }
-        require(secretKey.isNotBlank()) { "LANGFUSE_SECRET_KEY must be set" }
-        return LangfuseClient.builder()
-            .url(baseUrl)
-            .credentials(publicKey, secretKey)
-            .build()
-    }
 
     @Bean
     fun toolExecutionExceptionProcessor() = ToolExecutionExceptionProcessor { ex: ToolExecutionException ->
@@ -216,5 +201,6 @@ class AiConfig {
 //    }
 //
 //}
+
 
 
