@@ -32,47 +32,14 @@ class AIController(
     val openAiAudioSpeechModel: OpenAiAudioSpeechModel,
     val openAiAudioTranscriptionModel: OpenAiAudioTranscriptionModel,
     @Lazy val  chatClient: ChatClient,
+    //val toolCallbacks: List<ToolCallback>,
     val toolCallbackRecorder: ToolCallRecorder,
    // val mcpToolProvider: ToolCallbackProvider,
     val conferenceTools: ConferenceTools,
     private val tracer: Tracer
 ) {
 
-
-    @PostMapping("/chat_")
-    fun chat_(@RequestBody chatMessage: ChatMessage): String? =
-        chatClient
-            .prompt()
-            .system(SYSTEM_PROMPT)
-            .user(chatMessage.message)
-            .tools(conferenceTools)
-            .toolContext(mapOf("conversationId" to chatMessage.conversationId))
-            .advisors {
-                it.param(CONVERSATION_ID, chatMessage.conversationId)
-            }
-            .call()
-            .content()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    val interceptedTools =  ToolCallbacks.from(conferenceTools).toList().map { RecordingToolCallback(it, toolCallbackRecorder) }
-
-
+val interceptedTools =  ToolCallbacks.from(conferenceTools).toList().map { RecordingToolCallback(it, toolCallbackRecorder) }
 
     @PostMapping("/chat")
     fun chat(@RequestBody chatMessage: ChatMessage): String? {
@@ -88,7 +55,7 @@ class AIController(
                 .system(SYSTEM_PROMPT)
                 .user(chatMessage.message)
                 //.toolContext(mapOf("progressToken" to "token-${nextInt()}"))
-                .toolContext(mapOf("conversationId" to  chatMessage.conversationId))
+                .toolContext(mapOf(CONVERSATION_ID to  chatMessage.conversationId))
                 //.tools(conferenceTools)
                 .toolCallbacks(interceptedTools)
                 .advisors {
@@ -103,7 +70,6 @@ class AIController(
             span.end()
         }
     }
-
 
 
 
@@ -202,16 +168,15 @@ class AIController(
     }
 
     companion object {
-        // always in Pirate speech.
         val SYSTEM_PROMPT = """
-            You are a helper assistant for the JFall 2026 conference. 
+            You are a helper assistant for the JFall 2025 conference. 
             Respond in a friendly, helpful manner.
             Objective: Assist the user in finding the best matching sessions for his preferences and provide relevant information about the conference.
             Make use of tools to fetch relevant information about sessions, speakers, and venue details.
             """
 
         val SYSTEM_PROMPT_AUDIO = """
-            You are a helper assistant for the JFall 2026 conference. 
+            You are a helper assistant for the JFall 2025 conference. 
             Respond in a friendly, helpful manner, yet crisp manner.
             Objective: Assist the user in finding the best matching sessions for his preferences and provide relevant information about the conference.
             Make use of tools to fetch relevant information about sessions, preferred sessions, venue details and speakers. Also include web searches.
